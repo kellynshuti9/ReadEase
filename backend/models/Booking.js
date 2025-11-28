@@ -8,16 +8,16 @@ const BookingSchema = new mongoose.Schema({
     endDate: { type: Date, required: true },
     totalDays: { type: Number, required: true },
     totalPrice: { type: Number, required: true },
-    status: { type: String, default: 'Pending' }, // Pending, Confirmed, Cancelled
+    status: { type: String, default: 'Pending' }, 
     pickupLocation: { type: String, default: 'Main Office' },
     
-    // Payment fields
-    paymentStatus: { type: String, default: 'Pending' }, // Pending, Paid, Failed, Refunded
-    paymentMethod: { type: String }, // card, paypal, etc.
-    paymentId: { type: String }, // Payment processor ID (Stripe, etc.)
+    
+    paymentStatus: { type: String, default: 'Pending' }, 
+    paymentMethod: { type: String }, 
+    paymentId: { type: String }, 
     paymentDate: { type: Date },
     
-    // Customer details for payment
+    
     customerName: { type: String },
     customerEmail: { type: String },
     customerPhone: { type: String }

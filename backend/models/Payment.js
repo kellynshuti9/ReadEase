@@ -6,14 +6,14 @@ const PaymentSchema = new mongoose.Schema({
     userId: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },
     amount: { type: Number, required: true },
     currency: { type: String, default: 'USD' },
-    paymentMethod: { type: String, required: true }, // card, paypal, etc.
-    paymentStatus: { type: String, default: 'Pending' }, // Pending, Completed, Failed, Refunded
-    paymentIntentId: { type: String }, // Stripe Payment Intent ID
+    paymentMethod: { type: String, required: true }, 
+    paymentStatus: { type: String, default: 'Pending' }, 
+    paymentIntentId: { type: String }, 
     transactionId: { type: String },
     customerEmail: { type: String, required: true },
     customerName: { type: String, required: true },
     
-    // Card details (for demo - in production use payment processor)
+    
     cardLast4: { type: String },
     cardBrand: { type: String },
     
