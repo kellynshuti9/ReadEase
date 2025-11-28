@@ -1,0 +1,29 @@
+
+<svg width="180" height="50" viewBox="0 0 180 50" xmlns="http://www.w3.org/2000/svg">
+  <!-- Modern Car Icon -->
+  <g transform="translate(5, 8)">
+    <!-- Car Body - Sleek Design -->
+    <path d="M5,20 C5,10 15,5 25,5 L45,5 C55,5 65,10 65,20 L65,25 C65,30 60,32 55,32 L15,32 C10,32 5,30 5,25 Z" 
+          fill="#0b1d51" stroke="#0b1d51" stroke-width="0.5"/>
+    
+    <!-- Windshield -->
+    <path d="M15,8 L25,8 L22,18 L12,18 Z" fill="#ffffff" opacity="0.9"/>
+    <path d="M35,8 L45,8 L48,18 L38,18 Z" fill="#ffffff" opacity="0.9"/>
+    
+    <!-- Headlights -->
+    <circle cx="10" cy="22" r="2" fill="#ffffff"/>
+    <circle cx="60" cy="22" r="2" fill="#ffffff"/>
+    
+    <!-- Wheels -->
+    <circle cx="18" cy="32" r="4" fill="#0b1d51"/>
+    <circle cx="18" cy="32" r="1.5" fill="#ffffff"/>
+    <circle cx="52" cy="32" r="4" fill="#0b1d51"/>
+    <circle cx="52" cy="32" r="1.5" fill="#ffffff"/>
+  </g>
+  
+  <!-- Professional Text -->
+  <text x="75" y="30" font-family="'Segoe UI', Tahoma, Geneva, Verdana, sans-serif" 
+        font-size="20" font-weight="600" letter-spacing="1" fill="#0b1d51">
+    RideEase
+  </text>
+</svg>

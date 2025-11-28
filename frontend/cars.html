@@ -1,0 +1,709 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>RideEase - Our Fleet</title>
+    <link rel="icon" href="images/logo.svg" type="image/svg+xml">
+    <link rel="stylesheet" href="styles.css">
+    <style>
+        /* Cars Page Specific Styles */
+        .cars-hero {
+            background: var(--dark-blue);
+            color: var(--white);
+            padding: 3rem 0;
+            text-align: center;
+        }
+
+        .cars-hero h1 {
+            font-size: 2.5rem;
+            font-weight: 700;
+            margin-bottom: 1rem;
+        }
+
+        .cars-hero p {
+            font-size: 1.125rem;
+            opacity: 0.9;
+        }
+
+        .cars-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 3rem 2rem;
+        }
+
+        .filters-section {
+            background: var(--white);
+            border: 2px solid var(--dark-blue);
+            border-radius: 12px;
+            padding: 2rem;
+            margin-bottom: 3rem;
+            box-shadow: var(--shadow);
+        }
+
+        .filters-title {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--dark-blue);
+            margin-bottom: 1.5rem;
+            text-align: center;
+        }
+
+        .filters-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1.5rem;
+            align-items: end;
+        }
+
+        .filter-group {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .filter-label {
+            font-weight: 600;
+            color: var(--dark-blue);
+            margin-bottom: 0.5rem;
+        }
+
+        .filter-select, .filter-input {
+            padding: 1rem;
+            border: 2px solid var(--dark-blue);
+            border-radius: 6px;
+            font-size: 1rem;
+            background: var(--white);
+            transition: all 0.3s ease;
+        }
+
+        .filter-select:focus, .filter-input:focus {
+            outline: none;
+            box-shadow: 0 0 0 3px rgba(11, 29, 81, 0.1);
+        }
+
+        .cars-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+            gap: 2rem;
+        }
+
+        .car-card {
+            background: var(--white);
+            border: 2px solid var(--dark-blue);
+            border-radius: 12px;
+            overflow: hidden;
+            transition: all 0.3s ease;
+            box-shadow: var(--shadow);
+        }
+
+        .car-card:hover {
+            transform: translateY(-8px);
+            box-shadow: var(--shadow-lg);
+        }
+
+        .car-image-container {
+            width: 100%;
+            height: 220px;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .car-image {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            transition: transform 0.3s ease;
+        }
+
+        .car-card:hover .car-image {
+            transform: scale(1.05);
+        }
+
+        .car-badge {
+            position: absolute;
+            top: 1rem;
+            right: 1rem;
+            background: var(--dark-blue);
+            color: var(--white);
+            padding: 0.5rem 1rem;
+            border-radius: 20px;
+            font-size: 0.875rem;
+            font-weight: 600;
+        }
+
+        .car-content {
+            padding: 1.5rem;
+        }
+
+        .car-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: start;
+            margin-bottom: 1rem;
+        }
+
+        .car-name {
+            font-size: 1.25rem;
+            font-weight: 700;
+            color: var(--dark-blue);
+            line-height: 1.3;
+        }
+
+        .car-price {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--dark-blue);
+            text-align: right;
+        }
+
+        .car-specs {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 0.75rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .spec-item {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.5rem;
+            background: var(--light-gray);
+            border-radius: 6px;
+            color: var(--dark-blue);
+            font-size: 0.875rem;
+        }
+
+        .car-features {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .feature-tag {
+            background: var(--dark-blue);
+            color: var(--white);
+            padding: 0.25rem 0.75rem;
+            border-radius: 15px;
+            font-size: 0.75rem;
+            font-weight: 600;
+        }
+
+        .book-btn {
+            width: 100%;
+            padding: 1rem;
+            background: var(--dark-blue);
+            color: var(--white);
+            border: 2px solid var(--dark-blue);
+            border-radius: 6px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .book-btn:hover {
+            background: var(--white);
+            color: var(--dark-blue);
+            transform: translateY(-2px);
+            box-shadow: var(--shadow);
+        }
+
+        .loading-state {
+            text-align: center;
+            padding: 4rem 2rem;
+            color: var(--dark-blue);
+        }
+
+        .loading-spinner {
+            width: 40px;
+            height: 40px;
+            border: 4px solid var(--light-gray);
+            border-top: 4px solid var(--dark-blue);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 1rem;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .no-cars {
+            text-align: center;
+            padding: 4rem 2rem;
+            color: var(--dark-blue);
+            grid-column: 1 / -1;
+        }
+
+        .no-cars-icon {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+        }
+
+        .results-info {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 2rem;
+            padding: 1rem 0;
+            border-bottom: 2px solid var(--dark-blue);
+        }
+
+        .results-count {
+            font-size: 1.125rem;
+            font-weight: 600;
+            color: var(--dark-blue);
+        }
+
+        .sort-options {
+            display: flex;
+            gap: 1rem;
+            align-items: center;
+        }
+
+        .sort-label {
+            font-weight: 600;
+            color: var(--dark-blue);
+        }
+
+        @media (max-width: 768px) {
+            .cars-container {
+                padding: 2rem 1rem;
+            }
+
+            .filters-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .cars-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .results-info {
+                flex-direction: column;
+                gap: 1rem;
+                text-align: center;
+            }
+
+            .car-header {
+                flex-direction: column;
+                gap: 0.5rem;
+            }
+
+            .car-price {
+                text-align: left;
+            }
+        }
+        /* ===== NAVBAR ===== */
+
+.professional-nav {
+    width: 100%;
+    background: white;
+    padding: 15px 0;
+    font-family: "Poppins", sans-serif;
+}
+
+/* ===== CONTAINER ===== */
+.nav-container {
+    max-width: 1300px;
+    margin: auto;
+    padding: 0 40px;
+
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+/* ===== BRAND ===== */
+.nav-brand {
+    display: flex;
+    align-items: center;
+    text-decoration: none;
+}
+
+.nav-logo {
+     width: 140px;   /* Big like your screenshot */
+    height: auto;
+    margin-right: 12px;
+}
+
+.brand-name {
+    font-size: 32px;  /* Bold + big (same as screenshot) */
+    font-weight: 700;
+    color: #06184A;
+    letter-spacing: 1.5px;
+}
+
+.brand-tagline {
+    font-size: 12px;  /* Small tagline, same style */
+    letter-spacing: 1.5px;
+    color: #4D5A80;
+}
+
+
+
+    </style>
+</head>
+<body>
+    <!-- Professional Navigation -->
+    <nav class="professional-nav">
+        <div class="nav-container">
+            <a href="home.html" class="nav-brand">
+                <img src="images/logo.svg" alt="RideEase" class="nav-logo">
+                <div class="brand-text">
+                    <div class="brand-name">RIDEASE</div>
+                    <div class="brand-tagline">PREMIUM CAR RENTAL</div>
+                </div>
+            </a>
+            
+            <div class="nav-menu">
+                <a href="home.html" class="nav-link">Home</a>
+                <a href="cars.html" class="nav-link active">Browse Cars</a>
+                <a href="contact.html" class="nav-link">Contact</a>
+                <a href="profile.html" class="nav-link">Profile</a>
+                <button onclick="logout()" class="nav-button">Logout</button>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Cars Hero Section -->
+    <section class="cars-hero">
+        <div class="main-container">
+            <h1>Our Premium Fleet</h1>
+            <p>Discover the perfect vehicle for your journey from our carefully curated collection</p>
+        </div>
+    </section>
+
+    <!-- Cars Content -->
+    <div class="cars-container">
+        <!-- Filters Section -->
+        <div class="filters-section">
+            <h2 class="filters-title">Find Your Perfect Car</h2>
+            <div class="filters-grid">
+                <div class="filter-group">
+                    <label class="filter-label">Car Type</label>
+                    <select id="typeFilter" class="filter-select" onchange="filterCars()">
+                        <option value="">All Types</option>
+                        <option value="Sedan">Sedan</option>
+                        <option value="SUV">SUV</option>
+                        <option value="Luxury">Luxury</option>
+                        <option value="Sports">Sports</option>
+                    </select>
+                </div>
+                
+                <div class="filter-group">
+                    <label class="filter-label">Price Range</label>
+                    <select id="priceFilter" class="filter-select" onchange="filterCars()">
+                        <option value="">Any Price</option>
+                        <option value="0-50">$0 - $50</option>
+                        <option value="50-100">$50 - $100</option>
+                        <option value="100-150">$100 - $150</option>
+                        <option value="150+">$150+</option>
+                    </select>
+                </div>
+                
+                <div class="filter-group">
+                    <label class="filter-label">Search Cars</label>
+                    <input type="text" id="searchInput" class="filter-input" placeholder="Search by car name..." onkeyup="filterCars()">
+                </div>
+                
+                <div class="filter-group">
+                    <label class="filter-label">Sort By</label>
+                    <select id="sortFilter" class="filter-select" onchange="sortCars()">
+                        <option value="name">Name: A-Z</option>
+                        <option value="name-desc">Name: Z-A</option>
+                        <option value="price">Price: Low to High</option>
+                        <option value="price-desc">Price: High to Low</option>
+                    </select>
+                </div>
+            </div>
+        </div>
+
+        <!-- Results Info -->
+        <div class="results-info">
+            <div class="results-count" id="resultsCount">Loading cars...</div>
+            <div class="sort-options">
+                <span class="sort-label">Sort:</span>
+                <select id="mobileSort" class="filter-select" onchange="sortCars()">
+                    <option value="name">Name A-Z</option>
+                    <option value="name-desc">Name Z-A</option>
+                    <option value="price">Price Low-High</option>
+                    <option value="price-desc">Price High-Low</option>
+                </select>
+            </div>
+        </div>
+
+        <!-- Cars Grid -->
+        <div id="carsContainer" class="cars-grid">
+            <div class="loading-state">
+                <div class="loading-spinner"></div>
+                <p>Loading our premium fleet...</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Professional Footer -->
+    <footer class="professional-footer">
+        <div class="footer-container">
+            <div class="footer-brand">
+                <img src="images/logo.svg" alt="RideEase" class="footer-logo">
+                <p>Your trusted partner for premium car rentals. Experience excellence in every journey.</p>
+                <div class="footer-social">
+                    <a href="#" class="social-icon">f</a>
+                    <a href="#" class="social-icon">t</a>
+                    <a href="#" class="social-icon">in</a>
+                    <a href="#" class="social-icon">ig</a>
+                </div>
+            </div>
+            
+            <div class="footer-section">
+                <h3>Quick Links</h3>
+                <ul class="footer-links">
+                    <li><a href="home.html">Home</a></li>
+                    <li><a href="cars.html">Browse Cars</a></li>
+                    <li><a href="contact.html">Contact Us</a></li>
+                    <li><a href="profile.html">My Profile</a></li>
+                </ul>
+            </div>
+            
+            <div class="footer-section">
+                <h3>Services</h3>
+                <ul class="footer-links">
+                    <li><a href="#">Business Rentals</a></li>
+                    <li><a href="#">Long Term Leasing</a></li>
+                    <li><a href="#">Airport Pickup</a></li>
+                    <li><a href="#">24/7 Roadside Assistance</a></li>
+                </ul>
+            </div>
+            
+            <div class="footer-section">
+                <h3>Contact Info</h3>
+                <div class="footer-contact">
+                    <p>📞 +1 (555) 123-RIDE</p>
+                    <p>✉️ info@ridease.com</p>
+                    <p>📍 123 Premium Drive</p>
+                    <p>🕒 24/7 Service</p>
+                </div>
+            </div>
+        </div>
+        
+        <div class="footer-bottom">
+            <p>&copy; 2024 RideEase. All rights reserved.</p>
+        </div>
+    </footer>
+
+    <script>
+        let allCars = [];
+        let isLoading = true;
+        
+        // Check authentication
+        document.addEventListener('DOMContentLoaded', async () => {
+            const token = localStorage.getItem('token');
+            if (!token) {
+                window.location.href = 'login.html';
+                return;
+            }
+            await loadCars();
+        });
+
+        // Load cars from API
+        async function loadCars() {
+            try {
+                isLoading = true;
+                showLoading();
+                
+                const response = await fetch('/api/cars');
+                if (!response.ok) {
+                    throw new Error('Failed to fetch cars');
+                }
+                allCars = await response.json();
+                displayCars(allCars);
+                
+            } catch (error) {
+                console.error('Error loading cars:', error);
+                showError('Error loading cars. Please try again.');
+            } finally {
+                isLoading = false;
+            }
+        }
+
+        // Show loading state
+        function showLoading() {
+            const container = document.getElementById('carsContainer');
+            container.innerHTML = `
+                <div class="loading-state">
+                    <div class="loading-spinner"></div>
+                    <p>Loading our premium fleet...</p>
+                </div>
+            `;
+        }
+
+        // Show error state
+        function showError(message) {
+            const container = document.getElementById('carsContainer');
+            container.innerHTML = `
+                <div class="no-cars">
+                    <div class="no-cars-icon">🚗</div>
+                    <h3>Unable to Load Cars</h3>
+                    <p>${message}</p>
+                    <button onclick="loadCars()" class="book-btn" style="margin-top: 1rem;">Try Again</button>
+                </div>
+            `;
+        }
+
+        // Display cars
+        function displayCars(cars) {
+            const container = document.getElementById('carsContainer');
+            const resultsCount = document.getElementById('resultsCount');
+            
+            if (cars.length === 0) {
+                container.innerHTML = `
+                    <div class="no-cars">
+                        <div class="no-cars-icon">🔍</div>
+                        <h3>No Cars Found</h3>
+                        <p>No vehicles match your current filters. Try adjusting your search criteria.</p>
+                    </div>
+                `;
+                resultsCount.textContent = '0 cars found';
+                return;
+            }
+
+            resultsCount.textContent = `${cars.length} car${cars.length !== 1 ? 's' : ''} available`;
+
+            container.innerHTML = cars.map(car => `
+                <div class="car-card">
+                    <div class="car-image-container">
+                        <img src="${car.image}" alt="${car.name}" class="car-image"
+                             onerror="this.src='https://images.unsplash.com/photo-1549317661-bd32c8ce0db2?w=400&h=250&fit=crop'">
+                        <div class="car-badge">${car.type}</div>
+                    </div>
+                    
+                    <div class="car-content">
+                        <div class="car-header">
+                            <h3 class="car-name">${car.name}</h3>
+                            <div class="car-price">$${car.price}<span style="font-size: 0.875rem; opacity: 0.8;">/day</span></div>
+                        </div>
+                        
+                        <div class="car-specs">
+                            <div class="spec-item">
+                                <span>👥</span>
+                                <span>${car.seats} seats</span>
+                            </div>
+                            <div class="spec-item">
+                                <span>⚡</span>
+                                <span>${car.transmission}</span>
+                            </div>
+                            <div class="spec-item">
+                                <span>⛽</span>
+                                <span>${car.fuel}</span>
+                            </div>
+                            <div class="spec-item">
+                                <span>🚗</span>
+                                <span>${car.type}</span>
+                            </div>
+                        </div>
+                        
+                        <div class="car-features">
+                            <span class="feature-tag">Full Insurance</span>
+                            <span class="feature-tag">24/7 Support</span>
+                            <span class="feature-tag">Free Cancellation</span>
+                        </div>
+                        
+                        <button onclick="bookCar('${car._id}')" class="book-btn">
+                            Book Now
+                        </button>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        // Filter cars
+        function filterCars() {
+            if (isLoading) return;
+            
+            const typeFilter = document.getElementById('typeFilter').value;
+            const priceFilter = document.getElementById('priceFilter').value;
+            const searchInput = document.getElementById('searchInput').value.toLowerCase();
+
+            let filteredCars = allCars.filter(car => {
+                const matchesType = !typeFilter || car.type === typeFilter;
+                const matchesSearch = !searchInput || car.name.toLowerCase().includes(searchInput);
+                
+                let matchesPrice = true;
+                if (priceFilter) {
+                    if (priceFilter === '0-50') matchesPrice = car.price <= 50;
+                    else if (priceFilter === '50-100') matchesPrice = car.price > 50 && car.price <= 100;
+                    else if (priceFilter === '100-150') matchesPrice = car.price > 100 && car.price <= 150;
+                    else if (priceFilter === '150+') matchesPrice = car.price > 150;
+                }
+                
+                return matchesType && matchesSearch && matchesPrice;
+            });
+
+            // Apply current sort
+            const sortValue = document.getElementById('sortFilter').value;
+            sortCars(filteredCars, sortValue);
+        }
+
+        // Sort cars
+        function sortCars(carsToSort = null, sortValue = null) {
+            if (isLoading) return;
+            
+            const sortBy = sortValue || document.getElementById('sortFilter').value;
+            const mobileSort = document.getElementById('mobileSort').value;
+            
+            // Sync both sort dropdowns
+            document.getElementById('sortFilter').value = sortBy;
+            document.getElementById('mobileSort').value = sortBy;
+
+            let cars = carsToSort || allCars;
+            
+            const sortedCars = [...cars].sort((a, b) => {
+                switch (sortBy) {
+                    case 'name':
+                        return a.name.localeCompare(b.name);
+                    case 'name-desc':
+                        return b.name.localeCompare(a.name);
+                    case 'price':
+                        return a.price - b.price;
+                    case 'price-desc':
+                        return b.price - a.price;
+                    default:
+                        return 0;
+                }
+            });
+
+            displayCars(sortedCars);
+        }
+
+        // Book car
+        function bookCar(carId) {
+            localStorage.setItem('selectedCarId', carId);
+            // Clear any previous booking data
+            localStorage.removeItem('startDate');
+            localStorage.removeItem('endDate');
+            localStorage.removeItem('pickupLocation');
+            window.location.href = 'booking.html';
+        }
+
+        // Logout
+        function logout() {
+            localStorage.removeItem('token');
+            localStorage.removeItem('selectedCarId');
+            window.location.href = 'login.html';
+        }
+
+        // Prevent form submission on enter in search
+        document.getElementById('searchInput').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                e.preventDefault();
+                filterCars();
+            }
+        });
+    </script>
+</body>
+</html>
