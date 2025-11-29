@@ -72,11 +72,11 @@
     <div class="container">
         <h2>Login to RideEase</h2>
 
-        <form id="loginForm">
-            <input type="email" id="email" placeholder="Email" required><br>
-            <input type="password" id="password" placeholder="Password" required><br>
-            <button type="submit">Login</button>
-        </form>
+        <form id="loginForm" autocomplete="off">
+    <input type="email" id="email" placeholder="Email" required autocomplete="off"><br>
+    <input type="password" id="password" placeholder="Password" required autocomplete="new-password"><br>
+    <button type="submit">Login</button>
+</form>
 
         <p>Don't have an account? <a href="signup.html">Sign up here</a></p>
         <p><a href="forgot-password.html">Forgot Password?</a></p>
@@ -85,48 +85,62 @@
     </div>
 
     <script>
-        const form = document.getElementById('loginForm');
-        const message = document.getElementById('message');
+    document.addEventListener('DOMContentLoaded', function() {
+        document.getElementById('email').value = '';
+        document.getElementById('password').value = '';
+        
+        setTimeout(() => {
+            document.getElementById('email').value = '';
+            document.getElementById('password').value = '';
+        }, 100);
+    });
 
-        form.addEventListener('submit', async (e) => {
-            e.preventDefault();
+    const form = document.getElementById('loginForm');
+    const message = document.getElementById('message');
 
-            const email = document.getElementById('email').value;
-            const password = document.getElementById('password').value;
+    
+    const API_URL = window.location.hostname === 'localhost' 
+        ? 'http://localhost:5000' 
+        : window.location.origin;
 
-            try {
-                const res = await fetch('http://localhost:5000/api/auth/login', {
-                    method: 'POST',
-                    headers: { 
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify({ email, password })
-                });
+    form.addEventListener('submit', async (e) => {
+        e.preventDefault();
 
-                const data = await res.json();
+        const email = document.getElementById('email').value;
+        const password = document.getElementById('password').value;
 
-                if (res.status === 200) {
-                    message.style.color = 'darkblue';
-                    message.innerText = 'Login successful! Redirecting...';
+        try {
+            const res = await fetch(`${API_URL}/api/auth/login`, {
+                method: 'POST',
+                headers: { 
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ email, password })
+            });
 
-                    // Save token
-                    localStorage.setItem('token', data.token);
+            const data = await res.json();
 
-                    setTimeout(() => {
-                        window.location.href = 'home.html';
-                    }, 1200);
+            if (res.status === 200) {
+                message.style.color = 'darkblue';
+                message.innerText = 'Login successful! Redirecting...';
 
-                } else {
-                    message.style.color = 'red';
-                    message.innerText = data.message;
-                }
+                localStorage.setItem('token', data.token);
 
-            } catch (err) {
+                setTimeout(() => {
+                    window.location.href = 'home.html';
+                }, 1200);
+
+            } else {
                 message.style.color = 'red';
-                message.innerText = 'Server error!';
+                message.innerText = data.message;
             }
-        });
-    </script>
 
+        } catch (err) {
+            message.style.color = 'red';
+            message.innerText = 'Server error! Please try again.';
+            console.error('Login error:', err);
+        }
+    });
+</script>
 </body>
 </html>
