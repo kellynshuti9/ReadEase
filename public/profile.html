@@ -265,56 +265,142 @@
         </div>
     </footer>
 
-    <script>
-        document.addEventListener('DOMContentLoaded', () => {
-            const token = localStorage.getItem('token'); 
-            if(!token){
-                window.location.href = 'login.html';
-            }
-        });
+<script>
+    
+    const API_URL = window.location.hostname === 'localhost' 
+        ? 'http://localhost:5000' 
+        : window.location.origin;
 
-        function logout(){
-            localStorage.removeItem('token');
+    document.addEventListener('DOMContentLoaded', async () => {
+        const token = localStorage.getItem('token'); 
+        if(!token){
             window.location.href = 'login.html';
+            return;
         }
+        
+       
+        await loadUserProfile();
+        await loadUserBookings();
+    });
 
-        function toggleFAQ(element) {
-            const faqItem = element.parentElement;
-            const isActive = faqItem.classList.contains('active');
-            
-            // Close all FAQ items
-            document.querySelectorAll('.faq-item').forEach(item => {
-                item.classList.remove('active');
-                item.querySelector('.faq-question span').textContent = '+';
+  
+    async function loadUserProfile() {
+        try {
+            const token = localStorage.getItem('token');
+            const response = await fetch(`${API_URL}/api/users/profile`, {
+                headers: {
+                    'Authorization': `Bearer ${token}`
+                }
             });
-            
-            // Open clicked item if it wasn't active
-            if (!isActive) {
-                faqItem.classList.add('active');
-                element.querySelector('span').textContent = '−';
+
+            if (!response.ok) {
+                throw new Error('Failed to load profile');
             }
+
+            const user = await response.json();
+            
+            
+            document.getElementById('name').value = user.name || '';
+            document.getElementById('email').value = user.email || '';
+            document.getElementById('phone').value = user.phone || '';
+            document.getElementById('address').value = user.address || '';
+            document.getElementById('licenseNumber').value = user.licenseNumber || '';
+
+        } catch (error) {
+            console.error('Error loading profile:', error);
+            alert('Error loading profile data. Please try again.');
+        }
+    }
+
+   
+    async function loadUserBookings() {
+        try {
+            const token = localStorage.getItem('token');
+            const response = await fetch(`${API_URL}/api/bookings/my-bookings`, {
+                headers: {
+                    'Authorization': `Bearer ${token}`
+                }
+            });
+
+            if (!response.ok) {
+                throw new Error('Failed to load bookings');
+            }
+
+            const bookings = await response.json();
+            displayBookings(bookings);
+
+        } catch (error) {
+            console.error('Error loading bookings:', error);
+            document.getElementById('bookingsList').innerHTML = '<p>Error loading bookings. Please try again.</p>';
+        }
+    }
+
+   
+    function displayBookings(bookings) {
+        const bookingsList = document.getElementById('bookingsList');
+        
+        if (bookings.length === 0) {
+            bookingsList.innerHTML = '<p>No bookings found.</p>';
+            return;
         }
 
-        document.getElementById('contactForm').addEventListener('submit', function(e) {
-            e.preventDefault();
-            
+        bookingsList.innerHTML = bookings.map(booking => `
+            <div class="booking-card">
+                <h3>${booking.carId?.name || 'Car'}</h3>
+                <p><strong>Dates:</strong> ${new Date(booking.startDate).toLocaleDateString()} - ${new Date(booking.endDate).toLocaleDateString()}</p>
+                <p><strong>Duration:</strong> ${booking.totalDays} days</p>
+                <p><strong>Total Price:</strong> $${booking.totalPrice}</p>
+                <p><strong>Status:</strong> <span style="color: ${booking.status === 'Confirmed' ? 'green' : 'orange'}">${booking.status || 'Pending'}</span></p>
+                <p><strong>Pickup:</strong> ${booking.pickupLocation}</p>
+            </div>
+        `).join('');
+    }
+
+   
+    document.getElementById('profileForm').addEventListener('submit', async (e) => {
+        e.preventDefault();
+        
+        try {
+            const token = localStorage.getItem('token');
             const formData = {
                 name: document.getElementById('name').value,
-                email: document.getElementById('email').value,
                 phone: document.getElementById('phone').value,
-                subject: document.getElementById('subject').value,
-                message: document.getElementById('message').value
+                address: document.getElementById('address').value,
+                licenseNumber: document.getElementById('licenseNumber').value
             };
-            
-            // In a real application, you would send this to your backend
-            console.log('Contact form submitted:', formData);
-            
-            // Show success message
-            alert('Thank you for your message! We will get back to you within 24 hours.');
-            
-            // Reset form
-            this.reset();
-        });
-    </script>
+
+            const response = await fetch(`${API_URL}/api/users/profile`, {
+                method: 'PUT',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${token}`
+                },
+                body: JSON.stringify(formData)
+            });
+
+            const data = await response.json();
+
+            if (response.ok) {
+                alert('Profile updated successfully!');
+            } else {
+                alert('Error updating profile: ' + data.message);
+            }
+
+        } catch (error) {
+            console.error('Error updating profile:', error);
+            alert('Error updating profile. Please try again.');
+        }
+    });
+
+    
+    function logout(){
+        localStorage.removeItem('token');
+        localStorage.removeItem('selectedCarId');
+        localStorage.removeItem('startDate');
+        localStorage.removeItem('endDate');
+        localStorage.removeItem('pickupLocation');
+        window.location.href = 'login.html';
+    }
+</script>
 </body>
 </html>

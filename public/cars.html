@@ -8,7 +8,7 @@
     <link rel="icon" href="images/logo.svg" type="image/svg+xml">
     <link rel="stylesheet" href="styles.css">
     <style>
-        /* Cars Page Specific Styles */
+       
         .cars-hero {
             background: var(--dark-blue);
             color: var(--white);
@@ -496,214 +496,219 @@
         </div>
     </footer>
 
-    <script>
-        let allCars = [];
-        let isLoading = true;
+   <script>
+    
+    const API_URL = window.location.hostname === 'localhost' 
+        ? 'http://localhost:5000' 
+        : window.location.origin;
+
+    let allCars = [];
+    let isLoading = true;
+    
+    
+    document.addEventListener('DOMContentLoaded', async () => {
+        const token = localStorage.getItem('token');
+        if (!token) {
+            window.location.href = 'login.html';
+            return;
+        }
+        await loadCars();
+    });
+
+    
+    async function loadCars() {
+        try {
+            isLoading = true;
+            showLoading();
+            
+            const response = await fetch(`${API_URL}/api/cars`);
+            if (!response.ok) {
+                throw new Error('Failed to fetch cars');
+            }
+            allCars = await response.json();
+            displayCars(allCars);
+            
+        } catch (error) {
+            console.error('Error loading cars:', error);
+            showError('Error loading cars. Please try again.');
+        } finally {
+            isLoading = false;
+        }
+    }
+
+ 
+    function showLoading() {
+        const container = document.getElementById('carsContainer');
+        container.innerHTML = `
+            <div class="loading-state">
+                <div class="loading-spinner"></div>
+                <p>Loading our premium fleet...</p>
+            </div>
+        `;
+    }
+
+    
+    function showError(message) {
+        const container = document.getElementById('carsContainer');
+        container.innerHTML = `
+            <div class="no-cars">
+                <div class="no-cars-icon">🚗</div>
+                <h3>Unable to Load Cars</h3>
+                <p>${message}</p>
+                <button onclick="loadCars()" class="book-btn" style="margin-top: 1rem;">Try Again</button>
+            </div>
+        `;
+    }
+
+   
+    function displayCars(cars) {
+        const container = document.getElementById('carsContainer');
+        const resultsCount = document.getElementById('resultsCount');
         
-        // Check authentication
-        document.addEventListener('DOMContentLoaded', async () => {
-            const token = localStorage.getItem('token');
-            if (!token) {
-                window.location.href = 'login.html';
-                return;
-            }
-            await loadCars();
-        });
-
-        // Load cars from API
-        async function loadCars() {
-            try {
-                isLoading = true;
-                showLoading();
-                
-                const response = await fetch('/api/cars');
-                if (!response.ok) {
-                    throw new Error('Failed to fetch cars');
-                }
-                allCars = await response.json();
-                displayCars(allCars);
-                
-            } catch (error) {
-                console.error('Error loading cars:', error);
-                showError('Error loading cars. Please try again.');
-            } finally {
-                isLoading = false;
-            }
-        }
-
-        // Show loading state
-        function showLoading() {
-            const container = document.getElementById('carsContainer');
-            container.innerHTML = `
-                <div class="loading-state">
-                    <div class="loading-spinner"></div>
-                    <p>Loading our premium fleet...</p>
-                </div>
-            `;
-        }
-
-        // Show error state
-        function showError(message) {
-            const container = document.getElementById('carsContainer');
+        if (cars.length === 0) {
             container.innerHTML = `
                 <div class="no-cars">
-                    <div class="no-cars-icon">🚗</div>
-                    <h3>Unable to Load Cars</h3>
-                    <p>${message}</p>
-                    <button onclick="loadCars()" class="book-btn" style="margin-top: 1rem;">Try Again</button>
+                    <div class="no-cars-icon">🔍</div>
+                    <h3>No Cars Found</h3>
+                    <p>No vehicles match your current filters. Try adjusting your search criteria.</p>
                 </div>
             `;
+            resultsCount.textContent = '0 cars found';
+            return;
         }
 
-        // Display cars
-        function displayCars(cars) {
-            const container = document.getElementById('carsContainer');
-            const resultsCount = document.getElementById('resultsCount');
-            
-            if (cars.length === 0) {
-                container.innerHTML = `
-                    <div class="no-cars">
-                        <div class="no-cars-icon">🔍</div>
-                        <h3>No Cars Found</h3>
-                        <p>No vehicles match your current filters. Try adjusting your search criteria.</p>
-                    </div>
-                `;
-                resultsCount.textContent = '0 cars found';
-                return;
-            }
+        resultsCount.textContent = `${cars.length} car${cars.length !== 1 ? 's' : ''} available`;
 
-            resultsCount.textContent = `${cars.length} car${cars.length !== 1 ? 's' : ''} available`;
-
-            container.innerHTML = cars.map(car => `
-                <div class="car-card">
-                    <div class="car-image-container">
-                        <img src="${car.image}" alt="${car.name}" class="car-image"
-                             onerror="this.src='https://images.unsplash.com/photo-1549317661-bd32c8ce0db2?w=400&h=250&fit=crop'">
-                        <div class="car-badge">${car.type}</div>
+        container.innerHTML = cars.map(car => `
+            <div class="car-card">
+                <div class="car-image-container">
+                    <img src="${car.image}" alt="${car.name}" class="car-image"
+                         onerror="this.src='https://images.unsplash.com/photo-1549317661-bd32c8ce0db2?w=400&h=250&fit=crop'">
+                    <div class="car-badge">${car.type}</div>
+                </div>
+                
+                <div class="car-content">
+                    <div class="car-header">
+                        <h3 class="car-name">${car.name}</h3>
+                        <div class="car-price">$${car.price}<span style="font-size: 0.875rem; opacity: 0.8;">/day</span></div>
                     </div>
                     
-                    <div class="car-content">
-                        <div class="car-header">
-                            <h3 class="car-name">${car.name}</h3>
-                            <div class="car-price">$${car.price}<span style="font-size: 0.875rem; opacity: 0.8;">/day</span></div>
+                    <div class="car-specs">
+                        <div class="spec-item">
+                            <span>👥</span>
+                            <span>${car.seats} seats</span>
                         </div>
-                        
-                        <div class="car-specs">
-                            <div class="spec-item">
-                                <span>👥</span>
-                                <span>${car.seats} seats</span>
-                            </div>
-                            <div class="spec-item">
-                                <span>⚡</span>
-                                <span>${car.transmission}</span>
-                            </div>
-                            <div class="spec-item">
-                                <span>⛽</span>
-                                <span>${car.fuel}</span>
-                            </div>
-                            <div class="spec-item">
-                                <span>🚗</span>
-                                <span>${car.type}</span>
-                            </div>
+                        <div class="spec-item">
+                            <span>⚡</span>
+                            <span>${car.transmission}</span>
                         </div>
-                        
-                        <div class="car-features">
-                            <span class="feature-tag">Full Insurance</span>
-                            <span class="feature-tag">24/7 Support</span>
-                            <span class="feature-tag">Free Cancellation</span>
+                        <div class="spec-item">
+                            <span>⛽</span>
+                            <span>${car.fuel}</span>
                         </div>
-                        
-                        <button onclick="bookCar('${car._id}')" class="book-btn">
-                            Book Now
-                        </button>
+                        <div class="spec-item">
+                            <span>🚗</span>
+                            <span>${car.type}</span>
+                        </div>
                     </div>
+                    
+                    <div class="car-features">
+                        <span class="feature-tag">Full Insurance</span>
+                        <span class="feature-tag">24/7 Support</span>
+                        <span class="feature-tag">Free Cancellation</span>
+                    </div>
+                    
+                    <button onclick="bookCar('${car._id}')" class="book-btn">
+                        Book Now
+                    </button>
                 </div>
-            `).join('');
-        }
+            </div>
+        `).join('');
+    }
 
-        // Filter cars
-        function filterCars() {
-            if (isLoading) return;
+ 
+    function filterCars() {
+        if (isLoading) return;
+        
+        const typeFilter = document.getElementById('typeFilter').value;
+        const priceFilter = document.getElementById('priceFilter').value;
+        const searchInput = document.getElementById('searchInput').value.toLowerCase();
+
+        let filteredCars = allCars.filter(car => {
+            const matchesType = !typeFilter || car.type === typeFilter;
+            const matchesSearch = !searchInput || car.name.toLowerCase().includes(searchInput);
             
-            const typeFilter = document.getElementById('typeFilter').value;
-            const priceFilter = document.getElementById('priceFilter').value;
-            const searchInput = document.getElementById('searchInput').value.toLowerCase();
-
-            let filteredCars = allCars.filter(car => {
-                const matchesType = !typeFilter || car.type === typeFilter;
-                const matchesSearch = !searchInput || car.name.toLowerCase().includes(searchInput);
-                
-                let matchesPrice = true;
-                if (priceFilter) {
-                    if (priceFilter === '0-50') matchesPrice = car.price <= 50;
-                    else if (priceFilter === '50-100') matchesPrice = car.price > 50 && car.price <= 100;
-                    else if (priceFilter === '100-150') matchesPrice = car.price > 100 && car.price <= 150;
-                    else if (priceFilter === '150+') matchesPrice = car.price > 150;
-                }
-                
-                return matchesType && matchesSearch && matchesPrice;
-            });
-
-            // Apply current sort
-            const sortValue = document.getElementById('sortFilter').value;
-            sortCars(filteredCars, sortValue);
-        }
-
-        // Sort cars
-        function sortCars(carsToSort = null, sortValue = null) {
-            if (isLoading) return;
+            let matchesPrice = true;
+            if (priceFilter) {
+                if (priceFilter === '0-50') matchesPrice = car.price <= 50;
+                else if (priceFilter === '50-100') matchesPrice = car.price > 50 && car.price <= 100;
+                else if (priceFilter === '100-150') matchesPrice = car.price > 100 && car.price <= 150;
+                else if (priceFilter === '150+') matchesPrice = car.price > 150;
+            }
             
-            const sortBy = sortValue || document.getElementById('sortFilter').value;
-            const mobileSort = document.getElementById('mobileSort').value;
-            
-            // Sync both sort dropdowns
-            document.getElementById('sortFilter').value = sortBy;
-            document.getElementById('mobileSort').value = sortBy;
+            return matchesType && matchesSearch && matchesPrice;
+        });
 
-            let cars = carsToSort || allCars;
-            
-            const sortedCars = [...cars].sort((a, b) => {
-                switch (sortBy) {
-                    case 'name':
-                        return a.name.localeCompare(b.name);
-                    case 'name-desc':
-                        return b.name.localeCompare(a.name);
-                    case 'price':
-                        return a.price - b.price;
-                    case 'price-desc':
-                        return b.price - a.price;
-                    default:
-                        return 0;
-                }
-            });
+       
+        const sortValue = document.getElementById('sortFilter').value;
+        sortCars(filteredCars, sortValue);
+    }
 
-            displayCars(sortedCars);
-        }
+   
+    function sortCars(carsToSort = null, sortValue = null) {
+        if (isLoading) return;
+        
+        const sortBy = sortValue || document.getElementById('sortFilter').value;
+        const mobileSort = document.getElementById('mobileSort').value;
+        
+        
+        document.getElementById('sortFilter').value = sortBy;
+        document.getElementById('mobileSort').value = sortBy;
 
-        // Book car
-        function bookCar(carId) {
-            localStorage.setItem('selectedCarId', carId);
-            // Clear any previous booking data
-            localStorage.removeItem('startDate');
-            localStorage.removeItem('endDate');
-            localStorage.removeItem('pickupLocation');
-            window.location.href = 'booking.html';
-        }
-
-        // Logout
-        function logout() {
-            localStorage.removeItem('token');
-            localStorage.removeItem('selectedCarId');
-            window.location.href = 'login.html';
-        }
-
-        // Prevent form submission on enter in search
-        document.getElementById('searchInput').addEventListener('keypress', function(e) {
-            if (e.key === 'Enter') {
-                e.preventDefault();
-                filterCars();
+        let cars = carsToSort || allCars;
+        
+        const sortedCars = [...cars].sort((a, b) => {
+            switch (sortBy) {
+                case 'name':
+                    return a.name.localeCompare(b.name);
+                case 'name-desc':
+                    return b.name.localeCompare(a.name);
+                case 'price':
+                    return a.price - b.price;
+                case 'price-desc':
+                    return b.price - a.price;
+                default:
+                    return 0;
             }
         });
-    </script>
+
+        displayCars(sortedCars);
+    }
+
+   
+    function bookCar(carId) {
+        localStorage.setItem('selectedCarId', carId);
+        
+        localStorage.removeItem('startDate');
+        localStorage.removeItem('endDate');
+        localStorage.removeItem('pickupLocation');
+        window.location.href = 'booking.html';
+    }
+
+    
+    function logout() {
+        localStorage.removeItem('token');
+        localStorage.removeItem('selectedCarId');
+        window.location.href = 'login.html';
+    }
+
+   
+    document.getElementById('searchInput').addEventListener('keypress', function(e) {
+        if (e.key === 'Enter') {
+            e.preventDefault();
+            filterCars();
+        }
+    });
+</script>
 </body>
 </html>

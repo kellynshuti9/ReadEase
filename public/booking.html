@@ -336,56 +336,56 @@
         <div class="booking-form-card">
             <h2 class="form-title">Booking Details</h2>
             
-            <form id="bookingForm">
-                <div class="form-group">
-                    <label class="form-label">Rental Period</label>
-                    <div class="date-inputs">
-                        <div>
-                            <label class="form-label">Pick-up Date</label>
-                            <input type="date" id="startDate" class="form-input" required>
-                        </div>
-                        <div>
-                            <label class="form-label">Return Date</label>
-                            <input type="date" id="endDate" class="form-input" required>
-                        </div>
-                    </div>
-                </div>
+<form id="bookingForm" autocomplete="off">
+    <div class="form-group">
+        <label class="form-label">Rental Period</label>
+        <div class="date-inputs">
+            <div>
+                <label class="form-label">Pick-up Date</label>
+                <input type="date" id="startDate" class="form-input" required autocomplete="off">
+            </div>
+            <div>
+                <label class="form-label">Return Date</label>
+                <input type="date" id="endDate" class="form-input" required autocomplete="off">
+            </div>
+        </div>
+    </div>
 
-                <div class="form-group">
-                    <label for="pickupLocation" class="form-label">Pick-up Location</label>
-                    <select id="pickupLocation" class="form-select" required>
-                        <option value="">Select location</option>
-                        <option value="Main Office - Downtown">Main Office - Downtown</option>
-                        <option value="Airport Terminal">Airport Terminal</option>
-                        <option value="City Center">City Center</option>
-                        <option value="Business District">Business District</option>
-                    </select>
-                </div>
+    <div class="form-group">
+        <label for="pickupLocation" class="form-label">Pick-up Location</label>
+        <select id="pickupLocation" class="form-select" required autocomplete="off">
+            <option value="">Select location</option>
+            <option value="Main Office - Downtown">Main Office - Downtown</option>
+            <option value="Airport Terminal">Airport Terminal</option>
+            <option value="City Center">City Center</option>
+            <option value="Business District">Business District</option>
+        </select>
+    </div>
 
-                <div class="price-summary">
-                    <h3>Price Summary</h3>
-                    <div class="price-item">
-                        <span>Daily Rate:</span>
-                        <span id="dailyRate">$0</span>
-                    </div>
-                    <div class="price-item">
-                        <span>Rental Days:</span>
-                        <span id="totalDays">0 days</span>
-                    </div>
-                    <div class="price-item">
-                        <span>Service Fee:</span>
-                        <span>$0</span>
-                    </div>
-                    <div class="price-item price-total">
-                        <span>Total Amount:</span>
-                        <span id="totalPrice">$0</span>
-                    </div>
-                </div>
+    <div class="price-summary">
+        <h3>Price Summary</h3>
+        <div class="price-item">
+            <span>Daily Rate:</span>
+            <span id="dailyRate">$0</span>
+        </div>
+        <div class="price-item">
+            <span>Rental Days:</span>
+            <span id="totalDays">0 days</span>
+        </div>
+        <div class="price-item">
+            <span>Service Fee:</span>
+            <span>$0</span>
+        </div>
+        <div class="price-item price-total">
+            <span>Total Amount:</span>
+            <span id="totalPrice">$0</span>
+        </div>
+    </div>
 
-                <button type="submit" class="book-btn" id="bookBtn" disabled>
-                    Proceed to Payment
-                </button>
-            </form>
+    <button type="submit" class="book-btn" id="bookBtn" disabled>
+        Proceed to Payment
+    </button>
+</form>
         </div>
     </div>
 
@@ -440,126 +440,131 @@
     </footer>
 
     <script>
-        let selectedCar = null;
-        const today = new Date().toISOString().split('T')[0];
+    let selectedCar = null;
+    const today = new Date().toISOString().split('T')[0];
+    
+    
+    const API_URL = window.location.hostname === 'localhost' 
+        ? 'http://localhost:5000' 
+        : window.location.origin;
+    
+    document.addEventListener('DOMContentLoaded', async () => {
+        if (!localStorage.getItem('token')) {
+            window.location.href = 'login.html';
+            return;
+        }
         
-        document.addEventListener('DOMContentLoaded', async () => {
-            if (!localStorage.getItem('token')) {
-                window.location.href = 'login.html';
-                return;
-            }
-            
-            document.getElementById('startDate').min = today;
-            await loadCarDetails();
-            setupDateListeners();
+        document.getElementById('startDate').min = today;
+        await loadCarDetails();
+        setupDateListeners();
+    });
+
+    async function loadCarDetails() {
+        const carId = localStorage.getItem('selectedCarId');
+        if (!carId) {
+            alert('No car selected. Redirecting to available cars.');
+            window.location.href = 'cars.html';
+            return;
+        }
+
+        try {
+            const response = await fetch(`${API_URL}/api/cars/${carId}`);
+            selectedCar = await response.json();
+            displayCarDetails(selectedCar);
+        } catch (error) {
+            console.error('Error loading car details:', error);
+            alert('Error loading car details. Please try again.');
+        }
+    }
+
+    function displayCarDetails(car) {
+        document.getElementById('carImage').src = car.image;
+        document.getElementById('carName').textContent = car.name;
+        document.getElementById('carType').textContent = car.type;
+        document.getElementById('carSeats').textContent = car.seats + ' seats';
+        document.getElementById('carTransmission').textContent = car.transmission;
+        document.getElementById('carFuel').textContent = car.fuel;
+        document.getElementById('carPrice').textContent = car.price;
+        document.getElementById('dailyRate').textContent = `$${car.price}`;
+    }
+
+    function setupDateListeners() {
+        const startDate = document.getElementById('startDate');
+        const endDate = document.getElementById('endDate');
+        
+        startDate.addEventListener('change', function() {
+            endDate.min = this.value;
+            calculatePrice();
         });
+        
+        endDate.addEventListener('change', calculatePrice);
+    }
 
-        async function loadCarDetails() {
-            const carId = localStorage.getItem('selectedCarId');
-            if (!carId) {
-                alert('No car selected. Redirecting to available cars.');
-                window.location.href = 'cars.html';
-                return;
-            }
+    function calculatePrice() {
+        const startDate = document.getElementById('startDate').value;
+        const endDate = document.getElementById('endDate').value;
+        const bookBtn = document.getElementById('bookBtn');
 
-            try {
-                const response = await fetch(`/api/cars/${carId}`);
-                selectedCar = await response.json();
-                displayCarDetails(selectedCar);
-            } catch (error) {
-                console.error('Error loading car details:', error);
-                alert('Error loading car details. Please try again.');
-            }
-        }
-
-        function displayCarDetails(car) {
-            document.getElementById('carImage').src = car.image;
-            document.getElementById('carName').textContent = car.name;
-            document.getElementById('carType').textContent = car.type;
-            document.getElementById('carSeats').textContent = car.seats + ' seats';
-            document.getElementById('carTransmission').textContent = car.transmission;
-            document.getElementById('carFuel').textContent = car.fuel;
-            document.getElementById('carPrice').textContent = car.price;
-            document.getElementById('dailyRate').textContent = `$${car.price}`;
-        }
-
-        function setupDateListeners() {
-            const startDate = document.getElementById('startDate');
-            const endDate = document.getElementById('endDate');
-            
-            startDate.addEventListener('change', function() {
-                endDate.min = this.value;
-                calculatePrice();
-            });
-            
-            endDate.addEventListener('change', calculatePrice);
-        }
-
-        function calculatePrice() {
-            const startDate = document.getElementById('startDate').value;
-            const endDate = document.getElementById('endDate').value;
-            const bookBtn = document.getElementById('bookBtn');
-
-            if (startDate && endDate && selectedCar) {
-                const start = new Date(startDate);
-                const end = new Date(endDate);
-                const totalDays = Math.ceil((end - start) / (1000 * 60 * 60 * 24));
-                
-                if (totalDays > 0) {
-                    const totalPrice = selectedCar.price * totalDays;
-                    document.getElementById('totalDays').textContent = totalDays + ' day' + (totalDays > 1 ? 's' : '');
-                    document.getElementById('totalPrice').textContent = `$${totalPrice}`;
-                    bookBtn.disabled = false;
-                    bookBtn.textContent = `Proceed to Payment - $${totalPrice}`;
-                } else {
-                    bookBtn.disabled = true;
-                    bookBtn.textContent = 'Proceed to Payment';
-                }
-            } else {
-                bookBtn.disabled = true;
-                bookBtn.textContent = 'Proceed to Payment';
-            }
-        }
-
-        document.getElementById('bookingForm').addEventListener('submit', async (e) => {
-            e.preventDefault();
-            
-            const startDate = document.getElementById('startDate').value;
-            const endDate = document.getElementById('endDate').value;
-            const pickupLocation = document.getElementById('pickupLocation').value;
-
-            // Validate dates
+        if (startDate && endDate && selectedCar) {
             const start = new Date(startDate);
             const end = new Date(endDate);
             const totalDays = Math.ceil((end - start) / (1000 * 60 * 60 * 24));
             
-            if (totalDays <= 0) {
-                alert('Please select valid dates');
-                return;
+            if (totalDays > 0) {
+                const totalPrice = selectedCar.price * totalDays;
+                document.getElementById('totalDays').textContent = totalDays + ' day' + (totalDays > 1 ? 's' : '');
+                document.getElementById('totalPrice').textContent = `$${totalPrice}`;
+                bookBtn.disabled = false;
+                bookBtn.textContent = `Proceed to Payment - $${totalPrice}`;
+            } else {
+                bookBtn.disabled = true;
+                bookBtn.textContent = 'Proceed to Payment';
             }
-
-            if (!pickupLocation) {
-                alert('Please select a pickup location');
-                return;
-            }
-
-            // Save booking details to localStorage for payment page
-            localStorage.setItem('startDate', startDate);
-            localStorage.setItem('endDate', endDate);
-            localStorage.setItem('pickupLocation', pickupLocation);
-
-            // Redirect to payment page
-            window.location.href = 'payment.html';
-        });
-
-        function logout() {
-            localStorage.removeItem('token');
-            localStorage.removeItem('selectedCarId');
-            localStorage.removeItem('startDate');
-            localStorage.removeItem('endDate');
-            localStorage.removeItem('pickupLocation');
-            window.location.href = 'login.html';
+        } else {
+            bookBtn.disabled = true;
+            bookBtn.textContent = 'Proceed to Payment';
         }
-    </script>
+    }
+
+    document.getElementById('bookingForm').addEventListener('submit', async (e) => {
+        e.preventDefault();
+        
+        const startDate = document.getElementById('startDate').value;
+        const endDate = document.getElementById('endDate').value;
+        const pickupLocation = document.getElementById('pickupLocation').value;
+
+       
+        const start = new Date(startDate);
+        const end = new Date(endDate);
+        const totalDays = Math.ceil((end - start) / (1000 * 60 * 60 * 24));
+        
+        if (totalDays <= 0) {
+            alert('Please select valid dates');
+            return;
+        }
+
+        if (!pickupLocation) {
+            alert('Please select a pickup location');
+            return;
+        }
+
+        
+        localStorage.setItem('startDate', startDate);
+        localStorage.setItem('endDate', endDate);
+        localStorage.setItem('pickupLocation', pickupLocation);
+
+       
+        window.location.href = 'payment.html';
+    });
+
+    function logout() {
+        localStorage.removeItem('token');
+        localStorage.removeItem('selectedCarId');
+        localStorage.removeItem('startDate');
+        localStorage.removeItem('endDate');
+        localStorage.removeItem('pickupLocation');
+        window.location.href = 'login.html';
+    }
+</script>
 </body>
 </html>
