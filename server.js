@@ -14,7 +14,7 @@ const app = express();
 // Middleware
 app.use(cors());
 app.use(bodyParser.json());
-app.use(express.static(path.join(__dirname, 'frontend')));
+app.use(express.static(path.join(__dirname, 'public')));
 
 // Import models
 const User = require('./backend/models/User');
@@ -230,29 +230,29 @@ app.put('/api/users/profile', auth, async (req, res) => {
 
 // Serve frontend pages
 app.get('/', (req, res) => {
-    res.sendFile(path.join(__dirname, 'frontend', 'login.html'));
+    res.sendFile(path.join(__dirname, 'public', 'login.html'));
 });
 
 app.get('/home', (req, res) => {
-    res.sendFile(path.join(__dirname, 'frontend', 'home.html'));
+    res.sendFile(path.join(__dirname, 'public', 'home.html'));
 });
 
 app.get('/cars', (req, res) => {
-    res.sendFile(path.join(__dirname, 'frontend', 'cars.html'));
+    res.sendFile(path.join(__dirname, 'public', 'cars.html'));
 });
 
 app.get('/booking', (req, res) => {
-    res.sendFile(path.join(__dirname, 'frontend', 'booking.html'));
+    res.sendFile(path.join(__dirname, 'public', 'booking.html'));
 });
 
 app.get('/profile', (req, res) => {
-    res.sendFile(path.join(__dirname, 'frontend', 'profile.html'));
+    res.sendFile(path.join(__dirname, 'public', 'profile.html'));
 });
 app.get('/contact', (req, res) => {
-    res.sendFile(path.join(__dirname, 'frontend', 'contact.html'));
+    res.sendFile(path.join(__dirname, 'public', 'contact.html'));
 });
 app.get('/payment', (req, res) => { 
-    res.sendFile(path.join(__dirname, 'frontend', 'payment.html'));
+    res.sendFile(path.join(__dirname, 'public', 'payment.html'));
 });
 
 app.post('/api/payments/create-intent', auth, async (req, res) => {
@@ -390,7 +390,7 @@ const connectDB = async () => {
     }
 };
 app.get('/payment', (req, res) => {
-    res.sendFile(path.join(__dirname, 'frontend', 'payment.html'));
+    res.sendFile(path.join(__dirname, 'public', 'payment.html'));
 });
 
 // Add sample cars
